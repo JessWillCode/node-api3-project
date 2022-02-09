@@ -4,7 +4,7 @@ const yup = require('yup');
 function logger(req, res, next) {
   console.log(`[${req.method}] ${req.url}`);
   next();
-}
+};
 
 function validateUserId(req, res, next) {
   getById(req.params.id)
@@ -22,15 +22,33 @@ function validateUserId(req, res, next) {
   .catch(next);
 };
 
-function validateUser(req, res, next) {
-  // DO YOUR MAGIC
-}
+const userSchema = yup.object({
+  name: yup.string().trim().min(3).required()
+});
 
-function validatePost(req, res, next) {
-  // DO YOUR MAGIC
-}
+const validateUser = async (req, res, next) => {
+  try {
+    const validated = await userSchema.validate(req.body);
+    req.body = validated;
+  } catch (err) {
+    next(err);
+  }
+};
 
-// do not forget to expose these functions to other modules
+const postSchema = yup.object({
+  text: yup.string().trim().min(3).required()
+});
+
+const validatePost = (req, res, next) => {
+  try {
+    const validated = await postSchema.validate(req.body);
+    req.body = validated;
+  } catch(err) {
+    next(err);
+  }
+};
+
+
 module.exports = {
   logger,
   validateUserId, 
