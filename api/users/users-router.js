@@ -36,16 +36,50 @@ router.put('/:id', validateUserId, validateUser,  (req, res, next) => {
   .catch(next);
 });
 
-router.delete('/:id', validateUserId, (req, res, next) => {
-  // RETURN THE FRESHLY DELETED USER OBJECT
+router.delete('/:id', validateUserId, async (req, res, next) => {
+  try {
+    const deletedUser = await Users.getById(req.params.id);
+    if(!deletedUser) {
+      next();
+    } else {
+      await Users.remove(req.params.id);
+      res.json(deletedUser);
+    }
+  } catch (err) {
+    res.status(500).json({
+      message: 'Post could not be deleted'
+    });
+  }
 });
 
-router.get('/:id/posts', validateUserId, (req, res, next) => {
-  // RETURN THE ARRAY OF USER POSTS
+
+router.get('/:id/posts', validateUserId, async(req, res, next) => {
+  try {
+    const userPosts = await Users.getUserPosts(req.params.id);
+    if(!userPosts){
+      next();
+    } else {
+      res.status(201).json(userPosts);
+    }
+  } catch (err) {
+    res.status(500).json({
+      message: 'Post could not be fetched'
+    });
+  }
 });
 
 router.post('/:id/posts', validateUserId, validatePost, (req, res, next) => {
-  // RETURN THE NEWLY CREATED USER POST
+  Posts.insert(req.body)
+  .then(post => {
+    req.body = post;
+    if(!post) {
+      console.log('POST', post);
+      next();
+    } else {
+      res.status(201).json(post);
+    }
+  })
+  .catch(next);
 });
 
 module.exports = router;
