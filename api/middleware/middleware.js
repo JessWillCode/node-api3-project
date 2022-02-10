@@ -1,4 +1,4 @@
-const { getById } = require('./users/users-model');
+const Users = require('../users/users-model.js');
 const yup = require('yup');
 
 function logger(req, res, next) {
@@ -7,15 +7,14 @@ function logger(req, res, next) {
 };
 
 function validateUserId(req, res, next) {
-  getById(req.params.id)
+  Users.getById(req.params.id)
   .then(id => {
     if(id) {
-      req.id = id;
+      req.user = id;
       next();
     } else {
-      next({
-        status: 404,
-        message: `user id ${req.params.id}`
+      res.status(404).json({
+        message: "user not found"
       });
     }
   })
@@ -23,30 +22,37 @@ function validateUserId(req, res, next) {
 };
 
 const userSchema = yup.object({
-  name: yup.string().trim().min(3).required()
+  name: yup.string().trim().required()
 });
 
 const validateUser = async (req, res, next) => {
   try {
     const validated = await userSchema.validate(req.body);
-    req.body = validated;
+    req.user = validated;
+    next();
   } catch (err) {
-    next(err);
+    res.status(400).json({
+    message: 'missing required name field'
+    })
   }
 };
 
 const postSchema = yup.object({
-  text: yup.string().trim().min(3).required()
+  text: yup.string().trim().required()
 });
 
-const validatePost = (req, res, next) => {
+const validatePost = async (req, res, next) => {
   try {
     const validated = await postSchema.validate(req.body);
     req.body = validated;
   } catch(err) {
-    next(err);
+    next({
+      status: 400,
+      message: 'missing required text field'
+    });
   }
 };
+
 
 
 module.exports = {
