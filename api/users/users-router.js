@@ -69,19 +69,15 @@ router.get('/:id/posts', validateUserId, async(req, res, next) => {
 });
 
 router.post('/:id/posts', validateUserId, validatePost, async (req, res, next) => {
-  try{
-    const newPost = await Posts.insert(req.body);
-    
-    if(!post) {
-      next();
-    } else {
-      console.log('POST', newPost);
-      res.status(201).json(newpost);
-    }
-  } catch(err) {
-    res.status(500).json({
-      message: 'Post could not be added'
+console.log('POST', req.text);
+  try {
+    const newPost = await Posts.insert({
+      user_id: req.params.id,
+      text: req.text
     });
+      res.status(201).json(newPost);
+  } catch(err) {
+    next(err);
   }
 })
 

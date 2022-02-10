@@ -37,24 +37,17 @@ const validateUser = async (req, res, next) => {
   }
 };
 
-const postSchema = yup.object({
-  text: yup.string().trim().required()
-});
-
-const validatePost = async (req, res, next) => {
-  try {
-    console.log('VALIDATED', req.body);
-    const validated = await postSchema.validate(req.body);
-    req.post = validated;
-    next();
-  } catch(err) {
+const validatePost = (req, res, next) => {
+  const { text } = req.body;
+  if(!text) {
     res.status(400).json({
       message: 'missing required text field'
     })
+  } else {
+    req.text = text;
+    next();
   }
-};
-
-
+}
 
 module.exports = {
   logger,
