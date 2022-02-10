@@ -68,18 +68,21 @@ router.get('/:id/posts', validateUserId, async(req, res, next) => {
   }
 });
 
-router.post('/:id/posts', validateUserId, validatePost, (req, res, next) => {
-  Posts.insert(req.body)
-  .then(post => {
-    req.body = post;
+router.post('/:id/posts', validateUserId, validatePost, async (req, res, next) => {
+  try{
+    const newPost = await Posts.insert(req.body);
+    
     if(!post) {
-      console.log('POST', post);
       next();
     } else {
-      res.status(201).json(post);
+      console.log('POST', newPost);
+      res.status(201).json(newpost);
     }
-  })
-  .catch(next);
-});
+  } catch(err) {
+    res.status(500).json({
+      message: 'Post could not be added'
+    });
+  }
+})
 
 module.exports = router;

@@ -46,7 +46,6 @@ const validatePost = async (req, res, next) => {
     console.log('VALIDATED', req.body);
     const validated = await postSchema.validate(req.body);
     req.post = validated;
-    
     next();
   } catch(err) {
     res.status(400).json({
